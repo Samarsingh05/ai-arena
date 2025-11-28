@@ -1,17 +1,25 @@
 import postgres from "postgres"
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not set")
+// Lazy connection - only create when needed
+let sqlInstance: ReturnType<typeof postgres> | null = null
+
+function getSql() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is not set")
+  }
+  
+  if (!sqlInstance) {
+    sqlInstance = postgres(process.env.DATABASE_URL, {
+      max: 1, // Single connection for serverless
+      idle_timeout: 20,
+      connect_timeout: 10,
+    })
+  }
+  
+  return sqlInstance
 }
 
-// Create a single connection pool
-const sql = postgres(process.env.DATABASE_URL, {
-  max: 1, // Single connection for serverless
-  idle_timeout: 20,
-  connect_timeout: 10,
-})
-
-export { sql }
+export { getSql }
 
 // Simple ID generator (cuid-like)
 function generateId() {
@@ -22,6 +30,7 @@ function generateId() {
 export const db = {
   // User operations
   async findUserByEmail(email: string) {
+    const sql = getSql()
     const users = await sql`
       SELECT * FROM "User" WHERE email = ${email} LIMIT 1
     `
@@ -29,6 +38,7 @@ export const db = {
   },
 
   async createUser(email: string, password: string) {
+    const sql = getSql()
     const id = generateId()
     const now = new Date()
     await sql`
@@ -39,6 +49,7 @@ export const db = {
   },
 
   async getAllUsers() {
+    const sql = getSql()
     return await sql`
       SELECT * FROM "User" ORDER BY "createdAt" DESC
     `
@@ -46,12 +57,14 @@ export const db = {
 
   // API Key operations
   async findApiKeysByUserId(userId: string) {
+    const sql = getSql()
     return await sql`
       SELECT * FROM "ApiKey" WHERE "userId" = ${userId}
     `
   },
 
   async findApiKeysByUserIdAndProviders(userId: string, providers: string[]) {
+    const sql = getSql()
     return await sql`
       SELECT * FROM "ApiKey" 
       WHERE "userId" = ${userId} 
@@ -60,6 +73,7 @@ export const db = {
   },
 
   async findApiKeyByUserIdAndProvider(userId: string, provider: string) {
+    const sql = getSql()
     const keys = await sql`
       SELECT * FROM "ApiKey" 
       WHERE "userId" = ${userId} AND provider = ${provider} 
@@ -74,6 +88,7 @@ export const db = {
     encryptedKey: string
     status: string
   }) {
+    const sql = getSql()
     const id = generateId()
     const now = new Date()
     await sql`
@@ -84,6 +99,7 @@ export const db = {
   },
 
   async updateApiKey(id: string, data: { encryptedKey: string; status: string }) {
+    const sql = getSql()
     const now = new Date()
     await sql`
       UPDATE "ApiKey" 
@@ -95,11 +111,13 @@ export const db = {
   },
 
   async deleteApiKey(id: string) {
+    const sql = getSql()
     await sql`DELETE FROM "ApiKey" WHERE id = ${id}`
   },
 
   // Usage Log operations
   async findUsageLogs(userId: string, providers: string[], since: Date) {
+    const sql = getSql()
     return await sql`
       SELECT * FROM "UsageLog" 
       WHERE "userId" = ${userId} 
@@ -118,6 +136,7 @@ export const db = {
     costEstimate: number
     leftPercent: number
   }) {
+    const sql = getSql()
     const id = generateId()
     const now = new Date()
     await sql`
