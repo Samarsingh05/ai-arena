@@ -1,4 +1,4 @@
-import { prisma } from "./db"
+import { db } from "./db"
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 import { z } from "zod"
@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
           const { email, password, mode = "login" } = parsed.data
 
           // Look up existing user
-          const existingUser = await prisma.user.findUnique({ where: { email } })
+          const existingUser = await db.findUserByEmail(email)
 
           if (mode === "signup") {
             // SIGN UP FLOW
@@ -40,9 +40,7 @@ export const authOptions: NextAuthOptions = {
             }
 
             // Create new user with plain text password (dev only)
-            const user = await prisma.user.create({
-              data: { email, password }
-            })
+            const user = await db.createUser(email, password)
             return { id: user.id, email: user.email }
           } else {
             // LOGIN FLOW

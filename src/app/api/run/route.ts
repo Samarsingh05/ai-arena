@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
+import { db } from "@/lib/db"
 import { decryptText } from "@/lib/crypto"
 import { estimateTokens } from "@/lib/tokenizer"
 import { estimateCost } from "@/lib/pricing"
@@ -49,9 +49,7 @@ export async function POST(req: NextRequest) {
   // unique providers for key + quota fetching
   const providers = Array.from(new Set(selections.map(s => s.provider)))
 
-  const keys = await prisma.apiKey.findMany({
-    where: { userId, provider: { in: providers } }
-  })
+  const keys = await db.findApiKeysByUserIdAndProviders(userId, providers)
 
   const keyMap = new Map<string, string>()
   keys.forEach(k => {
@@ -59,15 +57,8 @@ export async function POST(req: NextRequest) {
   })
 
   const now = new Date()
-  const recentLogs = await prisma.usageLog.findMany({
-    where: {
-      userId,
-      provider: { in: providers },
-      timestamp: {
-        gte: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30)
-      }
-    }
-  })
+  const since = new Date(now.getTime() - 1000 * 60 * 60 * 24 * 30)
+  const recentLogs = await db.findUsageLogs(userId, providers, since)
 
   const usedByProvider: Record<string, number> = {}
   for (const log of recentLogs) {
@@ -252,16 +243,14 @@ export async function POST(req: NextRequest) {
       const newUsed = prior + totalTokens
       const leftPercent = computeLeftPercent(newUsed, provider)
 
-      await prisma.usageLog.create({
-        data: {
-          userId,
-          provider,
-          model,
-          tokensIn,
-          tokensOut,
-          costEstimate: cost,
-          leftPercent
-        }
+      await db.createUsageLog({
+        userId,
+        provider,
+        model,
+        tokensIn,
+        tokensOut,
+        costEstimate: cost,
+        leftPercent
       })
 
       return {
@@ -285,16 +274,14 @@ export async function POST(req: NextRequest) {
     const newUsed = prior + totalTokens
     const leftPercent = computeLeftPercent(newUsed, provider)
 
-    await prisma.usageLog.create({
-      data: {
-        userId,
-        provider,
-        model,
-        tokensIn,
-        tokensOut,
-        costEstimate: cost,
-        leftPercent
-      }
+    await db.createUsageLog({
+      userId,
+      provider,
+      model,
+      tokensIn,
+      tokensOut,
+      costEstimate: cost,
+      leftPercent
     })
 
     return {

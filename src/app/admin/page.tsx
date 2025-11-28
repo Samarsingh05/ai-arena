@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/db"
+import { db } from "@/lib/db"
 
 const ADMIN_EMAIL = "2003singhsamar@gmail.com"
 
@@ -11,9 +11,7 @@ export default async function AdminPage() {
     redirect("/api/auth/signin?callbackUrl=/admin")
   }
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" }
-  })
+  const users = await db.getAllUsers()
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 space-y-6">
