@@ -20,6 +20,11 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         try {
+          if (!process.env.DATABASE_URL) {
+            console.error("DATABASE_URL is not set")
+            return null
+          }
+
           const parsed = credentialsSchema.safeParse(credentials)
           if (!parsed.success) return null
           const { email, password, mode = "login" } = parsed.data
@@ -71,5 +76,8 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     }
+  },
+  pages: {
+    signIn: "/",
   }
 }
