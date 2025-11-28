@@ -57,8 +57,13 @@ export const authOptions: NextAuthOptions = {
             // OK
             return { id: existingUser.id, email: existingUser.email }
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error("Auth error:", error)
+          // Log the full error for debugging
+          if (error?.message?.includes("does not exist") || error?.message?.includes("relation")) {
+            console.error("⚠️  Database tables not found! Please run setup-database.sql in your database.")
+          }
+          // Return null instead of throwing - NextAuth handles null as failed auth
           return null
         }
       }

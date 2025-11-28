@@ -30,22 +30,36 @@ function generateId() {
 export const db = {
   // User operations
   async findUserByEmail(email: string) {
-    const sql = getSql()
-    const users = await sql`
-      SELECT * FROM "User" WHERE email = ${email} LIMIT 1
-    `
-    return users[0] || null
+    try {
+      const sql = getSql()
+      const users = await sql`
+        SELECT * FROM "User" WHERE email = ${email} LIMIT 1
+      `
+      return users[0] || null
+    } catch (error: any) {
+      console.error("Database error in findUserByEmail:", error?.message || error)
+      throw new Error(`Database query failed: ${error?.message || "Unknown error"}`)
+    }
   },
 
   async createUser(email: string, password: string) {
-    const sql = getSql()
-    const id = generateId()
-    const now = new Date()
-    await sql`
-      INSERT INTO "User" (id, email, password, "createdAt")
-      VALUES (${id}, ${email}, ${password}, ${now})
-    `
-    return { id, email, password, createdAt: now }
+    try {
+      const sql = getSql()
+      const id = generateId()
+      const now = new Date()
+      await sql`
+        INSERT INTO "User" (id, email, password, "createdAt")
+        VALUES (${id}, ${email}, ${password}, ${now})
+      `
+      return { id, email, password, createdAt: now }
+    } catch (error: any) {
+      console.error("Database error in createUser:", error?.message || error)
+      // Check if it's a table doesn't exist error
+      if (error?.message?.includes("does not exist") || error?.message?.includes("relation")) {
+        throw new Error("Database tables not set up. Please run setup-database.sql in your database.")
+      }
+      throw new Error(`Database query failed: ${error?.message || "Unknown error"}`)
+    }
   },
 
   async getAllUsers() {
