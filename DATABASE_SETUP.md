@@ -9,11 +9,18 @@
 4. Wait for it to be ready (takes ~2 minutes)
 
 ### Step 2: Get Connection String
-1. In your Supabase project, go to **Settings** → **Database**
-2. Scroll down to **Connection string**
-3. Select **URI** format
-4. Copy the connection string (looks like: `postgresql://postgres:[YOUR-PASSWORD]@db.xxx.supabase.co:5432/postgres`)
-5. Replace `[YOUR-PASSWORD]` with your actual database password (shown when you created the project)
+1. **IMPORTANT**: Make sure your Supabase project is **active** (not paused)
+   - If paused, go to your Supabase dashboard and click "Restore" or "Resume"
+   
+2. In your Supabase project, go to **Settings** → **Database**
+3. Scroll down to **Connection string**
+4. **For Vercel/serverless, use the "Connection pooling" option:**
+   - Select **Connection pooling** tab
+   - Select **Session mode**
+   - Copy the connection string (looks like: `postgresql://postgres.xxx:[YOUR-PASSWORD]@aws-0-us-west-1.pooler.supabase.com:6543/postgres`)
+   - **OR** use **Transaction mode** if Session doesn't work
+5. Replace `[YOUR-PASSWORD]` with your actual database password
+   - If you forgot it, go to **Settings** → **Database** → **Database password** to reset it
 
 ### Step 3: Create Tables
 1. In Supabase, go to **SQL Editor**
@@ -24,10 +31,18 @@
 
 ### Step 4: Add to Vercel
 1. Go to your Vercel project → **Settings** → **Environment Variables**
-2. Add:
+2. Add these two variables:
+
+   **Variable 1:**
    - **Name**: `DATABASE_URL`
-   - **Value**: Your Supabase connection string
+   - **Value**: Your Supabase connection string (from Transaction pooler)
    - **Environment**: Production, Preview, Development (select all)
+
+   **Variable 2:**
+   - **Name**: `NEXTAUTH_SECRET`
+   - **Value**: Generate a random string (you can use: `openssl rand -base64 32` in terminal, or use https://generate-secret.vercel.app/32)
+   - **Environment**: Production, Preview, Development (select all)
+
 3. Save and redeploy
 
 ## Option 2: Vercel Postgres (If you prefer)
