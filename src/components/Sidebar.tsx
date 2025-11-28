@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createPortal } from "react-dom"
 import { ProviderId, PROVIDERS, getProviderMeta } from "@/lib/providers"
 import { loadSessions, SessionHistory as SessionHistoryType } from "@/lib/sessionHistory"
 
@@ -129,14 +128,9 @@ export function Sidebar({
 
   const [sessions, setSessions] = useState<SessionHistoryType[]>([])
   const [selectedSession, setSelectedSession] = useState<SessionHistoryType | null>(null)
-  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     setSessions(loadSessions())
-  }, [])
-
-  useEffect(() => {
-    setIsClient(true)
   }, [])
 
   useEffect(() => {
@@ -346,7 +340,7 @@ export function Sidebar({
         </div>
       </div>
 
-      {isClient && selectedSession && createPortal(modal, document.body)}
+      {selectedSession && modal}
     </div>
   )
 }
