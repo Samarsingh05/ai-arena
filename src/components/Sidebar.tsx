@@ -151,7 +151,7 @@ export function Sidebar({
 
   const modal =
     selectedSession && (
-      <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-xl p-4 md:p-8 flex items-center justify-center">
+      <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-xl p-4 md:p-8 flex items-center justify-center">
         <div className="w-full max-w-4xl max-h-[90vh] bg-gradient-to-br from-black/90 to-emerald-950/40 border border-emerald-500/20 rounded-3xl shadow-2xl shadow-black/60 overflow-hidden flex flex-col">
           <div className="flex justify-between items-start gap-4 p-6 border-b border-emerald-500/20 bg-black/40">
             <div>
@@ -215,7 +215,7 @@ export function Sidebar({
       </div>
     )
 
-  return (
+  const sidebarContent = (
     <div className="w-full lg:w-72 bg-black/92 backdrop-blur border border-emerald-200/20 lg:border-r lg:border-r-emerald-200/25 lg:h-[calc(100vh-4rem)] overflow-y-auto scrollbar-thin lg:sticky lg:top-16 flex-shrink-0 shadow-lg shadow-black/40">
       <div className="p-4 space-y-5">
         {/* Model Selection Section */}
@@ -339,9 +339,14 @@ export function Sidebar({
           </div>
         </div>
       </div>
-
-      {selectedSession && modal}
     </div>
+  )
+
+  return (
+    <>
+      {sidebarContent}
+      {selectedSession && modal}
+    </>
   )
 }
 

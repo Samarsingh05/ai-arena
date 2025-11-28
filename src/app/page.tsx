@@ -456,7 +456,7 @@ export default function Page() {
                       AI Model Comparison
                     </h1>
                     <p className="text-[12px] sm:text-[13px] text-emerald-300/80 max-w-xl">
-                      Compare multiple providers in one place. Pick a calmer palette, keep everything aligned, and get metrics that scale to every device.
+                      Compare multiple LLMs in one place.
                     </p>
                   </div>
                   <button
