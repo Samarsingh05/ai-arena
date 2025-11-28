@@ -3,6 +3,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useSession } from "next-auth/react"
 import { Navbar } from "@/components/Navbar"
 import { AuthGate } from "@/components/AuthGate"
 import { PromptBar } from "@/components/PromptBar"
@@ -152,6 +153,7 @@ type QuotaPoint = {
 type QuotaHistoryMap = Partial<Record<ProviderId, QuotaPoint[]>>
 
 export default function Page() {
+  const { data: session, status: sessionStatus } = useSession()
   const [step, setStep] = useState<"setup" | "arena">("setup")
 
   const [prompt, setPrompt] = useState("")
@@ -189,9 +191,17 @@ export default function Page() {
     }
   }
 
+  // Refresh keys when component mounts
   useEffect(() => {
     refreshKeys()
   }, [])
+
+  // Refresh keys when session becomes available (after login)
+  useEffect(() => {
+    if (sessionStatus === "authenticated" && session?.user?.id) {
+      refreshKeys()
+    }
+  }, [sessionStatus, session])
 
   const connectedProviders = useMemo(
     () => keyStatuses.filter(k => k.status === "connected").map(k => k.provider),
