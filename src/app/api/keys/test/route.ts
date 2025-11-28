@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
   try {
     // ✅ OpenAI
     if (provider === "openai" || provider === "openai-mini") {
-      const res = await fetch(`${process.env.OPENAI_BASE_URL}/models`, {
+      const baseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"
+      const res = await fetch(`${baseUrl}/models`, {
         method: "GET",
         headers: { Authorization: `Bearer ${apiKey}` }
       })
@@ -32,7 +33,8 @@ export async function POST(req: NextRequest) {
 
     // ✅ Anthropic / Claude
     else if (provider === "anthropic") {
-      const res = await fetch(`${process.env.ANTHROPIC_BASE_URL}/models`, {
+      const baseUrl = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com/v1"
+      const res = await fetch(`${baseUrl}/models`, {
         method: "GET",
         headers: {
           "x-api-key": apiKey,
@@ -78,7 +80,8 @@ export async function POST(req: NextRequest) {
 
     // ✅ Perplexity
     else if (provider === "perplexity") {
-  const res = await fetch(`${process.env.PERPLEXITY_BASE_URL}/chat/completions`, {
+      const baseUrl = process.env.PERPLEXITY_BASE_URL || "https://api.perplexity.ai"
+      const res = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,

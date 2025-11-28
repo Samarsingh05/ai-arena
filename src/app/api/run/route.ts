@@ -110,7 +110,8 @@ export async function POST(req: NextRequest) {
     try {
       // OPENAI
       if (provider === "openai") {
-        const res = await fetch(`${process.env.OPENAI_BASE_URL}/chat/completions`, {
+        const baseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"
+        const res = await fetch(`${baseUrl}/chat/completions`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${apiKey}`,
@@ -143,7 +144,8 @@ export async function POST(req: NextRequest) {
 
       // ANTHROPIC (Claude)
       else if (provider === "anthropic") {
-        const res = await fetch(`${process.env.ANTHROPIC_BASE_URL}/messages`, {
+        const baseUrl = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com/v1"
+        const res = await fetch(`${baseUrl}/messages`, {
           method: "POST",
           headers: {
             "x-api-key": apiKey,
@@ -182,7 +184,8 @@ export async function POST(req: NextRequest) {
 
       // GEMINI
       else if (provider === "gemini") {
-        const url = `${process.env.GEMINI_BASE_URL}/models/${model}:generateContent?key=${apiKey}`
+        const baseUrl = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta"
+        const url = `${baseUrl}/models/${model}:generateContent?key=${apiKey}`
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -208,7 +211,8 @@ export async function POST(req: NextRequest) {
 
       // PERPLEXITY
       else if (provider === "perplexity") {
-        const res = await fetch(`${process.env.PERPLEXITY_BASE_URL}/chat/completions`, {
+        const baseUrl = process.env.PERPLEXITY_BASE_URL || "https://api.perplexity.ai"
+        const res = await fetch(`${baseUrl}/chat/completions`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${apiKey}`,
